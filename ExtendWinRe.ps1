@@ -2,8 +2,6 @@ Param (
 [Parameter(Mandatory=$true,HelpMessage="Skip confirmation")][bool]$SkipConfirmation=$true,
 [Parameter(Mandatory=$true,HelpMessage="Path to backup old WinRE partition content to")][string]$BackupFolder
 )
-Set-ExecutionPolicy Unrestricted -Scope Process -Force
-Set-ExecutionPolicy Unrestricted
 # ------------------------------------
 # Helper functions
 # ------------------------------------
@@ -192,7 +190,7 @@ if ($PSBoundParameters.ContainsKey('BackupFolder'))
 # Verify whether we meet requirements of execution
 # - WinRE cannot be on OS partition for the extension
 # - WinRE partition must be the next partition after OS partition
-# - If WinRE partition already have >=400MB free space, no need to do repartition
+# - If WinRE partition already have >=250MB free space, no need to do repartition
 # - If there is enough unallocated space to grow the WinRE partition size, skip shrinking OS
 # 
 # However, if the WinRE partition is before the OS partition, there is no chance to extend it
@@ -216,7 +214,7 @@ $supportedSize = Get-PartitionSupportedSize -DriveLetter $OSDrive
 # if there is enough free space, skip extension
 if ($WinREPartitionSizeInfo[1] -ge 400MB)
 {
-    LogMessage("More than 400 MB of free space was detected in the WinRE partition, there is no need to extend the partition")
+    LogMessage("More than 250 MB of free space was detected in the WinRE partition, there is no need to extend the partition")
     exit 0
 }
 if ($WinREPartition.Offset -lt $OSPartitionEnds)
@@ -227,9 +225,9 @@ if ($WinREPartition.Offset -lt $OSPartitionEnds)
     $NeedShrink = $true
     
     # Calculate the size of repartition
-    # Will create a new WinRE partition with current WinRE partition size + 400 MB
+    # Will create a new WinRE partition with current WinRE partition size + 250 MB
     # The OS partition size will be shrunk by the new WinRE partition size
-    $targetWinREPartitionSize = $WinREPartitionSizeInfo[0] + 400MB
+    $targetWinREPartitionSize = $WinREPartitionSizeInfo[0] + 250MB
     $shrinkSize = [Math]::Ceiling($targetWinREPartitionSize / 1MB) * 1MB
     $targetOSPartitionSize = $OSPartition.Size - $shrinkSize
     if ($targetOSPartitionSize -lt $supportedSize.SizeMin)
@@ -252,13 +250,13 @@ else
         exit 1
     }
     # Calculate the size of repartition
-    # Will shrink OS partitition by 400 MB
-    $shrinkSize = 400MB
+    # Will shrink OS partitition by 250 MB
+    $shrinkSize = 250MB
     $targetOSPartitionSize = $OSPartition.Size - $shrinkSize
-    $targetWinREPartitionSize = $WinREPartitionSizeInfo[0] + 400MB
+    $targetWinREPartitionSize = $WinREPartitionSizeInfo[0] + 250MB
     $UnallocatedSpace = $WinREPartition.Offset - $OSPartitionEnds;
     # If there is unallocated space, consider using it
-    if ($UnallocatedSpace -ge 400MB)
+    if ($UnallocatedSpace -ge 250MB)
     {
         $UnallocatedSpace = $WinREPartition.Offset - $OSPartitionEnds;
         LogMessage("Found unallocated space between OS and WinRE partition: " + $UnallocatedSpace)
@@ -268,10 +266,10 @@ else
     }
     else
     {
-        $shrinkSize = [Math]::Ceiling((400MB - $UnallocatedSpace)/ 1MB) * 1MB
-        if ($shrinkSize > 100MB)
+        $shrinkSize = [Math]::Ceiling((250MB - $UnallocatedSpace)/ 1MB) * 1MB
+        if ($shrinkSize > 250MB)
         {
-            $shrinkSize = 400MB
+            $shrinkSize = 250MB
         }
         $targetOSPartitionSize = $OSPartition.Size - $shrinkSize
         if ($targetOSPartitionSize -lt $supportedSize.SizeMin)
@@ -319,9 +317,9 @@ else
     }
     else
     {
-        LogMessage("Will use 400MB from unallocated space between OS and WinRE partition")
+        LogMessage("Will use 250MB from unallocated space between OS and WinRE partition")
     }
-    LogMessage("Will extend WinRE partition size by 400MB")
+    LogMessage("Will extend WinRE partition size by 250MB")
     LogMessage("  WinRE partition: Disk [" + $OSDiskIndex + "] Partition [" + $WinREPartitionIndex + "]")
     LogMessage("  Current WinRE partition size: " + $WinREPartitionSizeInfo[0])
     LogMessage("  New WinRE partition size:     " + $targetWinREPartitionSize)
