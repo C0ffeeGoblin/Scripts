@@ -212,7 +212,7 @@ if ($WinREPartitionIndex -eq $OSPartition.PartitionNumber)
 }
 $supportedSize = Get-PartitionSupportedSize -DriveLetter $OSDrive
 # if there is enough free space, skip extension
-if ($WinREPartitionSizeInfo[1] -ge 400MB)
+if ($WinREPartitionSizeInfo[1] -ge 250MB)
 {
     LogMessage("More than 250 MB of free space was detected in the WinRE partition, there is no need to extend the partition")
     exit 0
@@ -222,7 +222,7 @@ if ($WinREPartition.Offset -lt $OSPartitionEnds)
     LogMessage("WinRE partition is not after OS partition, cannot perform extension")
     LogMessage("Need to create a new WinRE partition after OS partition")
     $NeedCreateNew = $true
-    $NeedShrink = $true
+    $NeedShrink = $false
     
     # Calculate the size of repartition
     # Will create a new WinRE partition with current WinRE partition size + 250 MB
