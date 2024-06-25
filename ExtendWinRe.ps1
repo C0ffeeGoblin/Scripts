@@ -269,7 +269,7 @@ else
     else
     {
         $shrinkSize = [Math]::Ceiling((400MB - $UnallocatedSpace)/ 1MB) * 1MB
-        if ($shrinkSize > 400MB)
+        if ($shrinkSize > 100MB)
         {
             $shrinkSize = 400MB
         }
