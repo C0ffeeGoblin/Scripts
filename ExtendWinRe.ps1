@@ -2,6 +2,8 @@ Param (
 [Parameter(Mandatory=$true,HelpMessage="Skip confirmation")][bool]$SkipConfirmation=$true,
 [Parameter(Mandatory=$true,HelpMessage="Path to backup old WinRE partition content to")][string]$BackupFolder
 )
+Set-ExecutionPolicy Unrestricted -Scope Process -Force
+Set-ExecutionPolicy Unrestricted
 # ------------------------------------
 # Helper functions
 # ------------------------------------
